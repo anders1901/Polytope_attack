@@ -1,0 +1,3 @@
+lp_maker
+lp_solve
+lpsolve55
