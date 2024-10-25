@@ -1,4 +1,4 @@
-DILITHIUM_PATH = ../../dilithium-master/ref
+DILITHIUM_PATH = ../../dilithium/ref
 
 CC ?= /usr/bin/cc
 CFLAGS += -Wall -Wno-unused-variable\
@@ -10,8 +10,8 @@ HEADERS = config.h params.h api.h sign.h packing.h polyvec.h poly.h ntt.h \
 KECCAK_SOURCES = $(SOURCES) fips202.c symmetric-shake.c randombytes.c
 KECCAK_HEADERS = $(HEADERS) fips202.h randombytes.h
 
-KAT_SOURCES = $(SOURCES) fips202.c symmetric-shake.c rng.c
-KAT_HEADERS = $(HEADERS) fips202.h rng.h
+KAT_SOURCES = $(SOURCES) fips202.c symmetric-shake.c nistkat/rng.c
+KAT_HEADERS = $(HEADERS) fips202.h nistkat/rng.h
 
 ALL_KAT_SOURCES = $(patsubst %,$(DILITHIUM_PATH)/%,$(KAT_SOURCES)) additional_fct.c
 ALL_KAT_HEADERS = $(patsubst %,$(DILITHIUM_PATH)/%,$(KAT_HEADERS)) additional_fct.h
