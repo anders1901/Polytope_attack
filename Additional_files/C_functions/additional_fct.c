@@ -215,25 +215,22 @@ unsigned int polyveck_make_hint_spec(polyveck *h, const polyveck *v0,
  *
  * Description: Computes signature according to specification.
  *
-* Arguments:   - uint8_t *sig:   pointer to output signature (of length CRYPTO_BYTES)
-*              - size_t *siglen: pointer to output length of signature
-*              - uint8_t *m:     pointer to message to be signed
-*              - size_t mlen:    length of message
-*              - uint8_t *ctx:   pointer to context string
-*              - size_t ctxlen:  length of context string
-*              - uint8_t *sk:    pointer to bit-packed secret key
+ * Arguments:   - uint8_t *sig:   pointer to output signature (of length
+ *CRYPTO_BYTES)
+ *              - size_t *siglen: pointer to output length of signature
+ *              - uint8_t *m:     pointer to message to be signed
+ *              - size_t mlen:    length of message
+ *              - uint8_t *ctx:   pointer to context string
+ *              - size_t ctxlen:  length of context string
+ *              - uint8_t *sk:    pointer to bit-packed secret key
  *
-* Returns 0 (success) or -1 (context string too long)
+ * Returns 0 (success) or -1 (context string too long)
  **************************************************/
-int crypto_sign_signature_spec(uint8_t *sig, 
-                               size_t *siglen, 
-                               const uint8_t *m,
-                               size_t mlen, 
-                               const uint8_t *ctx,
-                               size_t ctxlen,
+int crypto_sign_signature_spec(uint8_t *sig, size_t *siglen, const uint8_t *m,
+                               size_t mlen, const uint8_t *ctx, size_t ctxlen,
                                const uint8_t *sk) {
   unsigned int n;
-  uint8_t seedbuf[2*SEEDBYTES + TRBYTES + RNDBYTES + 2*CRHBYTES];
+  uint8_t seedbuf[2 * SEEDBYTES + TRBYTES + RNDBYTES + 2 * CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime, *rnd;
   uint16_t nonce = 0;
   polyvecl mat[K], s1, y, z;
@@ -241,7 +238,7 @@ int crypto_sign_signature_spec(uint8_t *sig,
   poly cp;
   keccak_state state;
 
-  if(ctxlen > 255)
+  if (ctxlen > 255)
     return -1;
 
   rho = seedbuf;
@@ -266,7 +263,7 @@ int crypto_sign_signature_spec(uint8_t *sig,
 #ifdef DILITHIUM_RANDOMIZED_SIGNING
   randombytes(rnd, RNDBYTES);
 #else
-  for(n=0;n<RNDBYTES;n++)
+  for (n = 0; n < RNDBYTES; n++)
     rnd[n] = 0;
 #endif
   shake256(rhoprime, CRHBYTES, key, SEEDBYTES + RNDBYTES + CRHBYTES);
@@ -339,31 +336,30 @@ rej:
   return 0;
 }
 
-
 /*************************************************
  * Name:        crypto_sign_signature_spec_r0_norm_faulted
  *
- * Description: Computes signature according to specification with r0 norm commented to simulate fault.
+ * Description: Computes signature according to specification with r0 norm
+ *commented to simulate fault.
  *
-* Arguments:   - uint8_t *sig:   pointer to output signature (of length CRYPTO_BYTES)
-*              - size_t *siglen: pointer to output length of signature
-*              - uint8_t *m:     pointer to message to be signed
-*              - size_t mlen:    length of message
-*              - uint8_t *ctx:   pointer to context string
-*              - size_t ctxlen:  length of context string
-*              - uint8_t *sk:    pointer to bit-packed secret key
+ * Arguments:   - uint8_t *sig:   pointer to output signature (of length
+ *CRYPTO_BYTES)
+ *              - size_t *siglen: pointer to output length of signature
+ *              - uint8_t *m:     pointer to message to be signed
+ *              - size_t mlen:    length of message
+ *              - uint8_t *ctx:   pointer to context string
+ *              - size_t ctxlen:  length of context string
+ *              - uint8_t *sk:    pointer to bit-packed secret key
  *
-* Returns 0 (success) or -1 (context string too long)
+ * Returns 0 (success) or -1 (context string too long)
  **************************************************/
-int crypto_sign_signature_spec_r0_norm_faulted(uint8_t *sig, 
-                                               size_t *siglen, 
-                                               const uint8_t *m,
-                                               size_t mlen, 
+int crypto_sign_signature_spec_r0_norm_faulted(uint8_t *sig, size_t *siglen,
+                                               const uint8_t *m, size_t mlen,
                                                const uint8_t *ctx,
                                                size_t ctxlen,
                                                const uint8_t *sk) {
   unsigned int n;
-  uint8_t seedbuf[2*SEEDBYTES + TRBYTES + RNDBYTES + 2*CRHBYTES];
+  uint8_t seedbuf[2 * SEEDBYTES + TRBYTES + RNDBYTES + 2 * CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime, *rnd;
   uint16_t nonce = 0;
   polyvecl mat[K], s1, y, z;
@@ -371,7 +367,7 @@ int crypto_sign_signature_spec_r0_norm_faulted(uint8_t *sig,
   poly cp;
   keccak_state state;
 
-  if(ctxlen > 255)
+  if (ctxlen > 255)
     return -1;
 
   rho = seedbuf;
@@ -396,7 +392,7 @@ int crypto_sign_signature_spec_r0_norm_faulted(uint8_t *sig,
 #ifdef DILITHIUM_RANDOMIZED_SIGNING
   randombytes(rnd, RNDBYTES);
 #else
-  for(n=0;n<RNDBYTES;n++)
+  for (n = 0; n < RNDBYTES; n++)
     rnd[n] = 0;
 #endif
   shake256(rhoprime, CRHBYTES, key, SEEDBYTES + RNDBYTES + CRHBYTES);
@@ -447,10 +443,9 @@ rej:
   polyveck_caddq(&r);
   polyveck_decompose(&r1, &r0, &r);
   polyveck_reduce(&r0);
-  /* This line is commented to simulate a fault (e.g., clock/voltage-glitch producing
-  skipping fault). Here, such a fault can bypass the branching on the 'if', thus skipping:
-  if (polyveck_chknorm(&r0, GAMMA2 - BETA))
-    goto rej;
+  /* This line is commented to simulate a fault (e.g., clock/voltage-glitch
+  producing skipping fault). Here, such a fault can bypass the branching on the
+  'if', thus skipping: if (polyveck_chknorm(&r0, GAMMA2 - BETA)) goto rej;
   */
 
   /* Compute hints for w1 */
@@ -472,7 +467,6 @@ rej:
   return 0;
 }
 
-
 /*************************************************
  * Name:        crypto_sign_signature_r0_norm_faulted
  *
@@ -488,15 +482,12 @@ rej:
  *
  * Returns 0 (success)
  **************************************************/
-int crypto_sign_signature_r0_norm_faulted(uint8_t *sig,
-                          size_t *siglen,
-                          const uint8_t *m,
-                          size_t mlen,
-                          const uint8_t *ctx,
-                          size_t ctxlen,
-                          const uint8_t *sk) {
+int crypto_sign_signature_r0_norm_faulted(uint8_t *sig, size_t *siglen,
+                                          const uint8_t *m, size_t mlen,
+                                          const uint8_t *ctx, size_t ctxlen,
+                                          const uint8_t *sk) {
   unsigned int n;
-  uint8_t seedbuf[2*SEEDBYTES + TRBYTES + RNDBYTES + 2*CRHBYTES];
+  uint8_t seedbuf[2 * SEEDBYTES + TRBYTES + RNDBYTES + 2 * CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime, *rnd;
   uint16_t nonce = 0;
   polyvecl mat[K], s1, y, z;
@@ -504,7 +495,7 @@ int crypto_sign_signature_r0_norm_faulted(uint8_t *sig,
   poly cp;
   keccak_state state;
 
-  if(ctxlen > 255)
+  if (ctxlen > 255)
     return -1;
 
   rho = seedbuf;
@@ -529,7 +520,7 @@ int crypto_sign_signature_r0_norm_faulted(uint8_t *sig,
 #ifdef DILITHIUM_RANDOMIZED_SIGNING
   randombytes(rnd, RNDBYTES);
 #else
-  for(n=0;n<RNDBYTES;n++)
+  for (n = 0; n < RNDBYTES; n++)
     rnd[n] = 0;
 #endif
   shake256(rhoprime, CRHBYTES, key, SEEDBYTES + RNDBYTES + CRHBYTES);
@@ -558,7 +549,7 @@ rej:
 
   shake256_init(&state);
   shake256_absorb(&state, mu, CRHBYTES);
-  shake256_absorb(&state, sig, K*POLYW1_PACKEDBYTES);
+  shake256_absorb(&state, sig, K * POLYW1_PACKEDBYTES);
   shake256_finalize(&state);
   shake256_squeeze(sig, CTILDEBYTES, &state);
   poly_challenge(&cp, sig);
@@ -569,7 +560,7 @@ rej:
   polyvecl_invntt_tomont(&z);
   polyvecl_add(&z, &z, &y);
   polyvecl_reduce(&z);
-  if(polyvecl_chknorm(&z, GAMMA1 - BETA))
+  if (polyvecl_chknorm(&z, GAMMA1 - BETA))
     goto rej;
 
   /* Check that subtracting cs2 does not change high bits of w and low bits
@@ -578,22 +569,21 @@ rej:
   polyveck_invntt_tomont(&h);
   polyveck_sub(&w0, &w0, &h);
   polyveck_reduce(&w0);
-  /* This line is commented to simulate a fault (e.g., clock/voltage-glitch producing
-  skipping fault). Here, such a fault can bypass the branching on the 'if', thus skipping:
-  if(polyveck_chknorm(&w0, GAMMA2 - BETA))
-    goto rej;
+  /* This line is commented to simulate a fault (e.g., clock/voltage-glitch
+  producing skipping fault). Here, such a fault can bypass the branching on the
+  'if', thus skipping: if(polyveck_chknorm(&w0, GAMMA2 - BETA)) goto rej;
   */
 
   /* Compute hints for w1 */
   polyveck_pointwise_poly_montgomery(&h, &cp, &t0);
   polyveck_invntt_tomont(&h);
   polyveck_reduce(&h);
-  if(polyveck_chknorm(&h, GAMMA2))
+  if (polyveck_chknorm(&h, GAMMA2))
     goto rej;
 
   polyveck_add(&w0, &w0, &h);
   n = polyveck_make_hint(&h, &w0, &w1);
-  if(n > OMEGA)
+  if (n > OMEGA)
     goto rej;
 
   /* Write signature */
@@ -601,7 +591,6 @@ rej:
   *siglen = CRYPTO_BYTES;
   return 0;
 }
-
 
 /*************************************************
  * Name:        test_coefficient_w1_different
@@ -618,23 +607,26 @@ rej:
  **************************************************/
 int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
                                   const uint8_t *m, size_t mlen,
-                                  const uint8_t *pk, int32_t *index) {
+                                  const uint8_t *ctx, size_t ctxlen,
+                                  int32_t *index) {
   unsigned int i;
-  int32_t polynomial, coefficient;
   uint8_t buf[K * POLYW1_PACKEDBYTES];
   uint8_t rho[SEEDBYTES];
   uint8_t mu[CRHBYTES];
-  uint8_t c[SEEDBYTES];
-  uint8_t c2[SEEDBYTES];
+  uint8_t c[CTILDEBYTES];
+  uint8_t c2[CTILDEBYTES];
   poly cp;
   polyvecl mat[K], z;
-  polyveck t1, w1, h, w1_test;
+  polyveck t1, w1, h;
   keccak_state state;
+
+  int32_t polynomial, coefficient;
+  polyveck w1_test;
   int32_t counter = 0;
   uint8_t flag = 0;
   int8_t pm = 0;
 
-  if (siglen != CRYPTO_BYTES)
+  if (ctxlen > 255 || siglen != CRYPTO_BYTES)
     return -1;
 
   unpack_pk(rho, &t1, pk);
@@ -644,9 +636,13 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
     return -1;
 
   /* Compute CRH(H(rho, t1), msg) */
-  shake256(mu, SEEDBYTES, pk, CRYPTO_PUBLICKEYBYTES);
+  shake256(mu, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
   shake256_init(&state);
-  shake256_absorb(&state, mu, SEEDBYTES);
+  shake256_absorb(&state, mu, TRBYTES);
+  mu[0] = 0;
+  mu[1] = ctxlen;
+  shake256_absorb(&state, mu, 2);
+  shake256_absorb(&state, ctx, ctxlen);
   shake256_absorb(&state, m, mlen);
   shake256_finalize(&state);
   shake256_squeeze(mu, CRHBYTES, &state);
