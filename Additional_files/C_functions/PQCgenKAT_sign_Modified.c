@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #include "additional_fct.h"
-#include "rng.h"
+#include "nistkat/rng.h"
 #include "sign.h"
 
 #define MAX_MARKER_LEN 50

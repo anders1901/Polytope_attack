@@ -608,7 +608,7 @@ rej:
 int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
                                   const uint8_t *m, size_t mlen,
                                   const uint8_t *ctx, size_t ctxlen,
-                                  int32_t *index) {
+                                  const uint8_t *pk, int32_t *index) {
   unsigned int i;
   uint8_t buf[K * POLYW1_PACKEDBYTES];
   uint8_t rho[SEEDBYTES];
