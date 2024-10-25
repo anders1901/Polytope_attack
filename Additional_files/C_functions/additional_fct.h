@@ -46,8 +46,12 @@ int crypto_sign_signature_spec_r0_norm_faulted(uint8_t *sig,
 
 #define crypto_sign_signature_r0_norm_faulted                                  \
   DILITHIUM_NAMESPACE(signature_faulted)
-int crypto_sign_signature_r0_norm_faulted(uint8_t *sig, size_t *siglen,
-                                          const uint8_t *m, size_t mlen,
+int crypto_sign_signature_r0_norm_faulted(uint8_t *sig,
+                                          size_t *siglen,
+                                          const uint8_t *m,
+                                          size_t mlen,
+                                          const uint8_t *ctx,
+                                          size_t ctxlen,
                                           const uint8_t *sk);
 
 int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
