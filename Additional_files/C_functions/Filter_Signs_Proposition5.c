@@ -14,7 +14,7 @@
 
 #include "additional_fct.h"
 #include "packing.h"
-#include "rng.h"
+#include "nistkat/rng.h"
 #include "sign.h"
 
 #define MAX_MARKER_LEN 50
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
       }
 
       coefficient_code = crypto_sign_verify_and_Az_ct(sm, CRYPTO_BYTES, msg,
-                                                      MSG_LEN, pk, &t0, &index);
+                                                      MSG_LEN, NULL, 0, pk, &t0, &index);
       // printf("coefficient_code = %d\n", coefficient_code);
       if (coefficient_code < -1) {
         fprintf(fp_signs_filtered, "count = %u\n", count_filtered_signs);

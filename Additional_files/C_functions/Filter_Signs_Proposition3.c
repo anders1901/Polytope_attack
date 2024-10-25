@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #include "additional_fct.h"
-#include "rng.h"
+#include "nistkat/rng.h"
 #include "sign.h"
 
 #define MAX_MARKER_LEN 50
@@ -153,10 +153,10 @@ int main(int argc, char *argv[]) {
       }
 
       verification_code =
-          crypto_sign_verify(sm, CRYPTO_BYTES, msg, MSG_LEN, pk);
+          crypto_sign_verify(sm, CRYPTO_BYTES, msg, MSG_LEN, NULL, 0, pk);
       if (verification_code != 0) {
         coefficient_code = test_coefficient_w1_different(sm, CRYPTO_BYTES, msg,
-                                                         MSG_LEN, pk, &index);
+                                                         MSG_LEN, NULL, 0, pk, &index);
         if (coefficient_code < -1) {
           fprintf(fp_signs_filtered, "count = %u\n", count_filtered_signs);
           fprintBstr(fp_signs_filtered, "sm = ", sm, CRYPTO_BYTES);
