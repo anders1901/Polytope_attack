@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   uint8_t r1[K * POLYW1_PACKEDBYTES], r0[K * POLYZ_PACKEDBYTES];
   polyvecl s1, s1hat;
   polyveck s2, t1, t0;
-  uint8_t rho[SEEDBYTES], tr[SEEDBYTES], key[SEEDBYTES];
+  uint8_t rho[SEEDBYTES], tr[TRBYTES], key[SEEDBYTES];
 
   if (argc != 2) {
     // Default number of signatures collected
