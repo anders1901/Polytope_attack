@@ -215,45 +215,61 @@ unsigned int polyveck_make_hint_spec(polyveck *h, const polyveck *v0,
  *
  * Description: Computes signature according to specification.
  *
- * Arguments:   - uint8_t *sig:   pointer to output signature (of length
- *CRYPTO_BYTES)
- *              - size_t *siglen: pointer to output length of signature
- *              - uint8_t *m:     pointer to message to be signed
- *              - size_t mlen:    length of message
- *              - uint8_t *sk:    pointer to bit-packed secret key
+* Arguments:   - uint8_t *sig:   pointer to output signature (of length CRYPTO_BYTES)
+*              - size_t *siglen: pointer to output length of signature
+*              - uint8_t *m:     pointer to message to be signed
+*              - size_t mlen:    length of message
+*              - uint8_t *ctx:   pointer to context string
+*              - size_t ctxlen:  length of context string
+*              - uint8_t *sk:    pointer to bit-packed secret key
  *
- * Returns 0 (success)
+* Returns 0 (success) or -1 (context string too long)
  **************************************************/
-int crypto_sign_signature_spec(uint8_t *sig, size_t *siglen, const uint8_t *m,
-                               size_t mlen, const uint8_t *sk) {
+int crypto_sign_signature_spec(uint8_t *sig, 
+                               size_t *siglen, 
+                               const uint8_t *m,
+                               size_t mlen, 
+                               const uint8_t *ctx,
+                               size_t ctxlen,
+                               const uint8_t *sk) {
   unsigned int n;
-  uint8_t seedbuf[3 * SEEDBYTES + 2 * CRHBYTES];
-  uint8_t *rho, *tr, *key, *mu, *rhoprime;
+  uint8_t seedbuf[2*SEEDBYTES + TRBYTES + RNDBYTES + 2*CRHBYTES];
+  uint8_t *rho, *tr, *key, *mu, *rhoprime, *rnd;
   uint16_t nonce = 0;
   polyvecl mat[K], s1, y, z;
   polyveck t0, s2, w, w1, w0, h, r, r1, r0, ct0, mh;
   poly cp;
   keccak_state state;
 
+  if(ctxlen > 255)
+    return -1;
+
   rho = seedbuf;
   tr = rho + SEEDBYTES;
-  key = tr + SEEDBYTES;
-  mu = key + SEEDBYTES;
+  key = tr + TRBYTES;
+  rnd = key + SEEDBYTES;
+  mu = rnd + RNDBYTES;
   rhoprime = mu + CRHBYTES;
   unpack_sk(rho, tr, key, &t0, &s1, &s2, sk);
 
-  /* Compute CRH(tr, msg) */
+  /* Compute mu = CRH(tr, 0, ctxlen, ctx, msg) */
+  mu[0] = 0;
+  mu[1] = ctxlen;
   shake256_init(&state);
-  shake256_absorb(&state, tr, SEEDBYTES);
+  shake256_absorb(&state, tr, TRBYTES);
+  shake256_absorb(&state, mu, 2);
+  shake256_absorb(&state, ctx, ctxlen);
   shake256_absorb(&state, m, mlen);
   shake256_finalize(&state);
   shake256_squeeze(mu, CRHBYTES, &state);
 
 #ifdef DILITHIUM_RANDOMIZED_SIGNING
-  randombytes(rhoprime, CRHBYTES);
+  randombytes(rnd, RNDBYTES);
 #else
-  shake256(rhoprime, CRHBYTES, key, SEEDBYTES + CRHBYTES);
+  for(n=0;n<RNDBYTES;n++)
+    rnd[n] = 0;
 #endif
+  shake256(rhoprime, CRHBYTES, key, SEEDBYTES + RNDBYTES + CRHBYTES);
 
   /* Expand matrix and transform vectors */
   polyvec_matrix_expand(mat, rho);
@@ -281,7 +297,7 @@ rej:
   shake256_absorb(&state, mu, CRHBYTES);
   shake256_absorb(&state, sig, K * POLYW1_PACKEDBYTES);
   shake256_finalize(&state);
-  shake256_squeeze(sig, SEEDBYTES, &state);
+  shake256_squeeze(sig, CTILDEBYTES, &state);
   poly_challenge(&cp, sig);
   poly_ntt(&cp);
 
@@ -311,13 +327,12 @@ rej:
   if (polyveck_chknorm(&ct0, GAMMA2))
     goto rej;
 
-  /* We add ct0 to w - cs2*/
+  /* We add w - cs2 and ct0*/
   polyveck_add(&mh, &r, &ct0);
-  // polyveck_caddq(&mh);
   n = polyveck_make_hint_spec(&h, &r, &mh);
-  if (n > OMEGA) {
+  if (n > OMEGA)
     goto rej;
-  }
+
   /* Write signature */
   pack_sig(sig, sig, &z, &h);
   *siglen = CRYPTO_BYTES;
