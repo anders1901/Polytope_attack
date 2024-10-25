@@ -477,7 +477,7 @@ rej:
  * Name:        crypto_sign_signature_r0_norm_faulted
  *
  * Description: Computes signature according to implementation with r0 norm
- *commented to simulate fault.
+ *              commented to simulate fault.
  *
  * Arguments:   - uint8_t *sig:   pointer to output signature (of length
  *CRYPTO_BYTES)
@@ -488,37 +488,51 @@ rej:
  *
  * Returns 0 (success)
  **************************************************/
-int crypto_sign_signature_r0_norm_faulted(uint8_t *sig, size_t *siglen,
-                                          const uint8_t *m, size_t mlen,
-                                          const uint8_t *sk) {
+int crypto_sign_signature_r0_norm_faulted(uint8_t *sig,
+                          size_t *siglen,
+                          const uint8_t *m,
+                          size_t mlen,
+                          const uint8_t *ctx,
+                          size_t ctxlen,
+                          const uint8_t *sk) {
   unsigned int n;
-  uint8_t seedbuf[3 * SEEDBYTES + 2 * CRHBYTES];
-  uint8_t *rho, *tr, *key, *mu, *rhoprime;
+  uint8_t seedbuf[2*SEEDBYTES + TRBYTES + RNDBYTES + 2*CRHBYTES];
+  uint8_t *rho, *tr, *key, *mu, *rhoprime, *rnd;
   uint16_t nonce = 0;
   polyvecl mat[K], s1, y, z;
   polyveck t0, s2, w1, w0, h;
   poly cp;
   keccak_state state;
 
+  if(ctxlen > 255)
+    return -1;
+
   rho = seedbuf;
   tr = rho + SEEDBYTES;
-  key = tr + SEEDBYTES;
-  mu = key + SEEDBYTES;
+  key = tr + TRBYTES;
+  rnd = key + SEEDBYTES;
+  mu = rnd + RNDBYTES;
   rhoprime = mu + CRHBYTES;
   unpack_sk(rho, tr, key, &t0, &s1, &s2, sk);
 
-  /* Compute CRH(tr, msg) */
+  /* Compute mu = CRH(tr, 0, ctxlen, ctx, msg) */
+  mu[0] = 0;
+  mu[1] = ctxlen;
   shake256_init(&state);
-  shake256_absorb(&state, tr, SEEDBYTES);
+  shake256_absorb(&state, tr, TRBYTES);
+  shake256_absorb(&state, mu, 2);
+  shake256_absorb(&state, ctx, ctxlen);
   shake256_absorb(&state, m, mlen);
   shake256_finalize(&state);
   shake256_squeeze(mu, CRHBYTES, &state);
 
 #ifdef DILITHIUM_RANDOMIZED_SIGNING
-  randombytes(rhoprime, CRHBYTES);
+  randombytes(rnd, RNDBYTES);
 #else
-  shake256(rhoprime, CRHBYTES, key, SEEDBYTES + CRHBYTES);
+  for(n=0;n<RNDBYTES;n++)
+    rnd[n] = 0;
 #endif
+  shake256(rhoprime, CRHBYTES, key, SEEDBYTES + RNDBYTES + CRHBYTES);
 
   /* Expand matrix and transform vectors */
   polyvec_matrix_expand(mat, rho);
@@ -544,9 +558,9 @@ rej:
 
   shake256_init(&state);
   shake256_absorb(&state, mu, CRHBYTES);
-  shake256_absorb(&state, sig, K * POLYW1_PACKEDBYTES);
+  shake256_absorb(&state, sig, K*POLYW1_PACKEDBYTES);
   shake256_finalize(&state);
-  shake256_squeeze(sig, SEEDBYTES, &state);
+  shake256_squeeze(sig, CTILDEBYTES, &state);
   poly_challenge(&cp, sig);
   poly_ntt(&cp);
 
@@ -555,7 +569,7 @@ rej:
   polyvecl_invntt_tomont(&z);
   polyvecl_add(&z, &z, &y);
   polyvecl_reduce(&z);
-  if (polyvecl_chknorm(&z, GAMMA1 - BETA))
+  if(polyvecl_chknorm(&z, GAMMA1 - BETA))
     goto rej;
 
   /* Check that subtracting cs2 does not change high bits of w and low bits
@@ -564,22 +578,22 @@ rej:
   polyveck_invntt_tomont(&h);
   polyveck_sub(&w0, &w0, &h);
   polyveck_reduce(&w0);
-  /* This line is commented to simulate a fault (e.g., clock-glitch producing
-     skipping fault) Here, one such fault can bypass the if branching thus
-     skipping the polyveck_chknorm call*/
-  // if(polyveck_chknorm(&w0, GAMMA2 - BETA))
-  //   goto rej;
+  /* This line is commented to simulate a fault (e.g., clock/voltage-glitch producing
+  skipping fault). Here, such a fault can bypass the branching on the 'if', thus skipping:
+  if(polyveck_chknorm(&w0, GAMMA2 - BETA))
+    goto rej;
+  */
 
   /* Compute hints for w1 */
   polyveck_pointwise_poly_montgomery(&h, &cp, &t0);
   polyveck_invntt_tomont(&h);
   polyveck_reduce(&h);
-  if (polyveck_chknorm(&h, GAMMA2))
+  if(polyveck_chknorm(&h, GAMMA2))
     goto rej;
 
   polyveck_add(&w0, &w0, &h);
   n = polyveck_make_hint(&h, &w0, &w1);
-  if (n > OMEGA)
+  if(n > OMEGA)
     goto rej;
 
   /* Write signature */
@@ -587,6 +601,7 @@ rej:
   *siglen = CRYPTO_BYTES;
   return 0;
 }
+
 
 /*************************************************
  * Name:        test_coefficient_w1_different
