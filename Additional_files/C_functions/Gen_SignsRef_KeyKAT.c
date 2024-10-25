@@ -105,8 +105,8 @@ int main(int argc, char *argv[]) {
     for (uint32_t nb_signs = 0; nb_signs < nb_Signs; nb_signs++) {
       randombytes(msg, MSG_LEN);
 
-      if ((ret_val = crypto_sign_signature_r0_norm_faulted(sm, &smlen, msg,
-                                                           MSG_LEN, NULL, 0, sk)) != 0) {
+      if ((ret_val = crypto_sign_signature_r0_norm_faulted(
+               sm, &smlen, msg, MSG_LEN, NULL, 0, sk)) != 0) {
         printf("crypto_sign returned <%d>\n", ret_val);
         return CRYPTO_FAILURE;
       }
