@@ -620,7 +620,7 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
   polyveck t1, w1, h;
   keccak_state state;
 
-  int32_t polynomial, coefficient;
+  int32_t poly_, coef_;
   polyveck w1_test;
   int32_t counter = 0;
   uint8_t flag = 0;
@@ -667,23 +667,19 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
   polyveck_caddq(&w1);
   polyveck_use_hint(&w1, &w1, &h);
 
-  // We backup our w1 value for the exhaustive search on the k \times n
-  // coefficients
-  for (polynomial = 0; polynomial < K; polynomial++) {
-    for (coefficient = 0; coefficient < N; coefficient++) {
-      w1_test.vec[polynomial].coeffs[coefficient] =
-          w1.vec[polynomial].coeffs[coefficient];
+  // Backup our w1 for exhaustive search on the k \times n coefficients
+  for (poly_ = 0; poly_ < K; poly_++) {
+    for (coef_ = 0; coef_ < N; coef_++) {
+      w1_test.vec[poly_].coeffs[coef_] = w1.vec[poly_].coeffs[coef_];
     }
   }
 
   // Exhaustive search on the k \times n coefficients of w_1'
-  for (polynomial = 0; polynomial < K; polynomial++) {
-    for (coefficient = 0; coefficient < N; coefficient++) {
+  for (poly_ = 0; poly_ < K; poly_++) {
+    for (coef_ = 0; coef_ < N; coef_++) {
       counter = 0;
-      // printf("START(polynomial, coefficient) = %d, %d \n", polynomial,
-      // coefficient); Case 1 where the coefficient w1 is w1' + 1
-      w1_test.vec[polynomial].coeffs[coefficient] =
-          test_value_pm(w1.vec[polynomial].coeffs[coefficient], 1);
+      w1_test.vec[poly_].coeffs[coef_] =
+          test_value_pm(w1.vec[poly_].coeffs[coef_], 1);
       polyveck_pack_w1(buf, &w1_test);
 
       /* Call random oracle and verify challenge */
@@ -698,8 +694,8 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
       // printf("flag1 = %d\n", flag);
       if (flag == 0) {
         // break;
-        w1_test.vec[polynomial].coeffs[coefficient] =
-            test_value_pm(w1.vec[polynomial].coeffs[coefficient], 0);
+        w1_test.vec[poly_].coeffs[coef_] =
+            test_value_pm(w1.vec[poly_].coeffs[coef_], 0);
         polyveck_pack_w1(buf, &w1_test);
 
         /* Call random oracle and verify challenge */
@@ -712,23 +708,15 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
         // We test if we have the same c or not
         flag = test_equality_c(c, c2);
         if (flag == 0) {
-          w1_test.vec[polynomial].coeffs[coefficient] =
-              w1.vec[polynomial].coeffs[coefficient];
+          w1_test.vec[poly_].coeffs[coef_] = w1.vec[poly_].coeffs[coef_];
         } else {
           pm = -2;
-          (*index) = polynomial * N + coefficient;
-          // printf("(w1 modified[%d][%d] = %d)  == (w1[%d][%d] = %d) + 1 \n\n",
-          // polynomial, coefficient,
-          // w1_test.vec[polynomial].coeffs[coefficient], polynomial,
-          // coefficient, w1.vec[polynomial].coeffs[coefficient]);
+          (*index) = poly_ * N + coef_;
           return pm;
         }
       } else {
         pm = -3;
-        (*index) = polynomial * N + coefficient;
-        // printf("(w1 modified[%d][%d] = %d)  ==  (w1[%d][%d] = %d) - 1\n\n",
-        // polynomial, coefficient, w1_test.vec[polynomial].coeffs[coefficient],
-        // polynomial, coefficient, w1.vec[polynomial].coeffs[coefficient]);
+        (*index) = poly_ * N + coef_;
         return pm;
       }
     }
