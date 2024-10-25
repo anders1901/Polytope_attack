@@ -725,88 +725,6 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
 
 
 /*************************************************
- * Name:        compute_Az_minus_ct
- *
- * Description: Verifies signature.
- *
- * Arguments:   - uint8_t *m: pointer to input signature
- *              - size_t siglen: length of signature
- *              - const uint8_t *m: pointer to message
- *              - size_t mlen: length of message
- *              - const uint8_t *pk: pointer to bit-packed public key
- *
- * Returns 0 if signature could be verified correctly and -1 otherwise
- **************************************************/
-int compute_Az_minus_ct(const uint8_t *sig, size_t siglen, const uint8_t *m,
-                        size_t mlen, const uint8_t *pk, polyveck *t0,
-                        uint8_t *r1, uint8_t *r0) {
-  unsigned int i, j;
-  uint8_t buf[K * POLYW1_PACKEDBYTES];
-  uint8_t rho[SEEDBYTES];
-  uint8_t mu[CRHBYTES];
-  uint8_t c[SEEDBYTES];
-  uint8_t c2[SEEDBYTES];
-  poly cp;
-  polyvecl mat[K], z;
-  polyveck t1, w1, w0, h;
-  keccak_state state;
-
-  if (siglen != CRYPTO_BYTES)
-    return -4;
-
-  unpack_pk(rho, &t1, pk);
-  if (unpack_sig(c, &z, &h, sig))
-    return -3;
-  if (polyvecl_chknorm(&z, GAMMA1 - BETA))
-    return -2;
-
-  /* Compute CRH(H(rho, t1), msg) */
-  shake256(mu, SEEDBYTES, pk, CRYPTO_PUBLICKEYBYTES);
-  shake256_init(&state);
-  shake256_absorb(&state, mu, SEEDBYTES);
-  shake256_absorb(&state, m, mlen);
-  shake256_finalize(&state);
-  shake256_squeeze(mu, CRHBYTES, &state);
-
-  /* Matrix-vector multiplication; compute Az - c2^dt1 */
-  poly_challenge(&cp, c);
-  polyvec_matrix_expand(mat, rho);
-
-  polyvecl_ntt(&z);
-  polyvec_matrix_pointwise_montgomery(&w1, mat, &z);
-
-  poly_ntt(&cp);
-  polyveck_shiftl(&t1);
-  polyveck_ntt(&t1);
-  polyveck_pointwise_poly_montgomery(&t1, &cp, &t1);
-  polyveck_sub(&w1, &w1, &t1);
-
-  polyveck_ntt(t0);
-  polyveck_pointwise_poly_montgomery(t0, &cp, t0);
-  polyveck_sub(&w1, &w1, t0);
-
-  polyveck_reduce(&w1);
-  polyveck_invntt_tomont(&w1);
-
-  /* Reconstruct w1 */
-  polyveck_caddq(&w1);
-  polyveck_decompose(&w1, &w0, &w1);
-
-  polyveck_pack_w1(r1, &w1);
-  for (i = 0; i < K; i++) {
-    printf("[");
-    for (j = 0; j < N - 1; j++) {
-      printf("%d, ", w0.vec[i].coeffs[j]);
-    }
-    printf("%d], ", w0.vec[i].coeffs[j]);
-
-    polyz_pack(r0 + i * POLYZ_PACKEDBYTES, &w0.vec[i]);
-  }
-  printf("\n");
-  return 0;
-}
-
-/*************************************************
  * Name:        crypto_sign_verify_and_Az_ct
  *
  * Description: Verifies signature.
@@ -819,32 +737,38 @@ int compute_Az_minus_ct(const uint8_t *sig, size_t siglen, const uint8_t *m,
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
-int crypto_sign_verify_and_Az_ct(const uint8_t *sig, size_t siglen,
-                                 const uint8_t *m, size_t mlen,
-                                 const uint8_t *pk, polyveck *t0,
+int crypto_sign_verify_and_Az_ct(const uint8_t *sig,
+                                 size_t siglen,
+                                 const uint8_t *m,
+                                 size_t mlen,
+                                 const uint8_t *ctx,
+                                 size_t ctxlen,
+                                 const uint8_t *pk, 
+                                 polyveck *t0,
                                  int32_t *index) {
-  unsigned int i, j;
+  unsigned int i;
   uint8_t buf[K * POLYW1_PACKEDBYTES];
   uint8_t rho[SEEDBYTES];
   uint8_t mu[CRHBYTES];
-  uint8_t c[SEEDBYTES];
-  uint8_t c2[SEEDBYTES];
+  uint8_t c[CTILDEBYTES];
+  uint8_t c2[CTILDEBYTES];
   poly cp;
   polyvecl mat[K], z;
-  polyveck t1, r1, r0, w1p, w1, h, t0hat;
+  polyveck t1, w1, h;
   keccak_state state;
-  int32_t poly_, coef_, diff;
-  int8_t pm = 0;
 
-  // We backup our w1 value for the exhaustive search on the k \times n
-  // coefficients
+  int32_t poly_, coef_, diff, j;
+  int8_t pm = 0;
+  polyveck r1, r0, w1p, t0hat;
+
+  // Backup t0 input for NTT conversion
   for (poly_ = 0; poly_ < K; poly_++) {
     for (coef_ = 0; coef_ < N; coef_++) {
       t0hat.vec[poly_].coeffs[coef_] = t0->vec[poly_].coeffs[coef_];
     }
   }
 
-  if (siglen != CRYPTO_BYTES)
+  if (ctxlen > 255 || siglen != CRYPTO_BYTES)
     return -1;
 
   unpack_pk(rho, &t1, pk);
@@ -852,11 +776,15 @@ int crypto_sign_verify_and_Az_ct(const uint8_t *sig, size_t siglen,
     return -1;
   if (polyvecl_chknorm(&z, GAMMA1 - BETA))
     return -1;
-  // printf("pas de pb\n");
+
   /* Compute CRH(H(rho, t1), msg) */
-  shake256(mu, SEEDBYTES, pk, CRYPTO_PUBLICKEYBYTES);
+  shake256(mu, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
   shake256_init(&state);
-  shake256_absorb(&state, mu, SEEDBYTES);
+  shake256_absorb(&state, mu, TRBYTES);
+  mu[0] = 0;
+  mu[1] = ctxlen;
+  shake256_absorb(&state, mu, 2);
+  shake256_absorb(&state, ctx, ctxlen);
   shake256_absorb(&state, m, mlen);
   shake256_finalize(&state);
   shake256_squeeze(mu, CRHBYTES, &state);
@@ -918,7 +846,7 @@ int crypto_sign_verify_and_Az_ct(const uint8_t *sig, size_t siglen,
  * Returns 0 if the challenges are not equal and 1 if they are equal
  **************************************************/
 int test_equality_c(uint8_t *c, uint8_t *c2) {
-  for (uint8_t i = 0; i < SEEDBYTES; i++) {
+  for (uint8_t i = 0; i < CTILDEBYTES; i++) {
     if (c[i] != c2[i]) {
       return 0;
     }

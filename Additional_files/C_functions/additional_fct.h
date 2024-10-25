@@ -56,11 +56,8 @@ int crypto_sign_signature_r0_norm_faulted(uint8_t *sig,
 
 int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
                                   const uint8_t *m, size_t mlen,
-                                  const uint8_t *pk, int32_t *index);
-
-int compute_Az_minus_ct(const uint8_t *sig, size_t siglen, const uint8_t *m,
-                        size_t mlen, const uint8_t *pk, polyveck *t0,
-                        uint8_t *r1, uint8_t *r0);
+                                  const uint8_t *ctx, size_t ctxlen,
+                                  int32_t *index);
 
 int crypto_sign_verify_and_Az_ct(const uint8_t *sig, size_t siglen,
                                  const uint8_t *m, size_t mlen,
