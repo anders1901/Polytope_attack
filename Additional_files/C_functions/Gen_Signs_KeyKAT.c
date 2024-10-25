@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #include "additional_fct.h"
-#include "rng.h"
+#include "nistkat/rng.h"
 
 #define MAX_MARKER_LEN 50
 #define MSG_LEN 32
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
       randombytes(msg, MSG_LEN);
 
       if ((ret_val = crypto_sign_signature_spec_r0_norm_faulted(
-               sm, &smlen, msg, MSG_LEN, sk)) != 0) {
+               sm, &smlen, msg, MSG_LEN, NULL, 0, sk)) != 0) {
         printf("crypto_sign returned <%d>\n", ret_val);
         return CRYPTO_FAILURE;
       }
