@@ -687,11 +687,10 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
       shake256_absorb(&state, mu, CRHBYTES);
       shake256_absorb(&state, buf, K * POLYW1_PACKEDBYTES);
       shake256_finalize(&state);
-      shake256_squeeze(c2, SEEDBYTES, &state);
+      shake256_squeeze(c2, CTILDEBYTES, &state);
 
       // We test if we have the same c or not
       flag = test_equality_c(c, c2);
-      // printf("flag1 = %d\n", flag);
       if (flag == 0) {
         // break;
         w1_test.vec[poly_].coeffs[coef_] =
@@ -703,7 +702,7 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
         shake256_absorb(&state, mu, CRHBYTES);
         shake256_absorb(&state, buf, K * POLYW1_PACKEDBYTES);
         shake256_finalize(&state);
-        shake256_squeeze(c2, SEEDBYTES, &state);
+        shake256_squeeze(c2, CTILDEBYTES, &state);
 
         // We test if we have the same c or not
         flag = test_equality_c(c, c2);
@@ -723,6 +722,7 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
   }
   return -1;
 }
+
 
 /*************************************************
  * Name:        compute_Az_minus_ct
