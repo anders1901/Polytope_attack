@@ -723,7 +723,6 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
   return -1;
 }
 
-
 /*************************************************
  * Name:        crypto_sign_verify_and_Az_ct
  *
@@ -737,14 +736,10 @@ int test_coefficient_w1_different(const uint8_t *sig, size_t siglen,
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
-int crypto_sign_verify_and_Az_ct(const uint8_t *sig,
-                                 size_t siglen,
-                                 const uint8_t *m,
-                                 size_t mlen,
-                                 const uint8_t *ctx,
-                                 size_t ctxlen,
-                                 const uint8_t *pk, 
-                                 polyveck *t0,
+int crypto_sign_verify_and_Az_ct(const uint8_t *sig, size_t siglen,
+                                 const uint8_t *m, size_t mlen,
+                                 const uint8_t *ctx, size_t ctxlen,
+                                 const uint8_t *pk, polyveck *t0,
                                  int32_t *index) {
   unsigned int i;
   uint8_t buf[K * POLYW1_PACKEDBYTES];
