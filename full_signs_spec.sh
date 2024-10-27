@@ -6,8 +6,7 @@ get_dilithium_version() {
     read -p "Which version of Dilithium do you want to target (2/3/5)? " ALG
     case $ALG in
       2)
-        # NBSIGNS=1250000
-        NBSIGNS=20000
+        NBSIGNS=1250000
         break
         ;;
       3)
