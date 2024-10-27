@@ -59,6 +59,9 @@ if MODE == 2 :
     GAMMA2 = (Q - 1)//88
     ALPHA = 2*GAMMA2
 
+    # Size of c seed 
+    CTILDEBYTES = 2*32
+
 elif MODE == 3 :
     # Size of vectors
     K = 6
@@ -83,6 +86,9 @@ elif MODE == 3 :
     # For decomposition modulo +/- ALPHA (Decompose)
     GAMMA2 = (Q - 1)//32
     ALPHA = 2*GAMMA2
+
+    # Size of c seed 
+    CTILDEBYTES = 2*48
 
 elif MODE == 5 :
     # Size of vectors
@@ -109,6 +115,9 @@ elif MODE == 5 :
     GAMMA2 = (Q - 1)//32
     ALPHA = 2*GAMMA2
 
+    # Size of c seed 
+    CTILDEBYTES = 2*64
+
 # Size of one polynomial of t1 packed
 POLT1_SIZE_PACKED = ((N*(QBITS - D))//8)
 # Size of one polynomial of t0 packed
@@ -132,10 +141,10 @@ STREAM256_BLOCKBYTES = SHAKE256_RATE
 # Size of pk/sk/signs
 CRYPTO_PUBLICKEYBYTES = (SEEDBYTES//2 + K * POLT1_SIZE_PACKED)
 
-# CRYPTO_SECRETKEYBYTES = (2*SEEDBYTES//2 + TRBYTES//2 + (L + K)*POLETA_SIZE_PACKED + K*POLT0_SIZE_PACKED)
-CRYPTO_SECRETKEYBYTES = (3*SEEDBYTES//2 + (L + K)*POLETA_SIZE_PACKED + K*POLT0_SIZE_PACKED)
+CRYPTO_SECRETKEYBYTES = (2*SEEDBYTES//2 + TRBYTES//2 + (L + K)*POLETA_SIZE_PACKED + K*POLT0_SIZE_PACKED)
+# CRYPTO_SECRETKEYBYTES = (3*SEEDBYTES//2 + (L + K)*POLETA_SIZE_PACKED + K*POLT0_SIZE_PACKED)
 
-CRYPTO_BYTES = (SEEDBYTES//2 + L*POLZ_SIZE_PACKED + (OMEGA + K))
+CRYPTO_BYTES = (CTILDEBYTES//2 + L*POLZ_SIZE_PACKED + (OMEGA + K))
 
 # Twiddle factors used for the NTT/INTT
 zetas = [    0,    25847, -2608894,  -518909,   237124,  -777960,  -876248,   466468,

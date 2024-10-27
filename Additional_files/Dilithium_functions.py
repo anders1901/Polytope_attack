@@ -572,8 +572,8 @@ def unpack_sk(sk):
     offset += SEEDBYTES
 
     # tr
-    tr = sk[offset : offset + SEEDBYTES]
-    offset += SEEDBYTES
+    tr = sk[offset : offset + TRBYTES]
+    offset += TRBYTES
 
     # s1
     s1 = [ polyeta_unpack(unhexlify(sk[offset + index : offset + index + POLETA_SIZE_PACKED*2])) for index in range(0, (POLETA_SIZE_PACKED*2)*L, (POLETA_SIZE_PACKED*2))]
@@ -694,8 +694,8 @@ def unpack_sig(z, h, seed, sig):
     offset = 0
 
     # Decode seed to expand c
-    seed += sig[:SEEDBYTES].encode()
-    offset += SEEDBYTES
+    seed += sig[:CTILDEBYTES].encode()
+    offset += CTILDEBYTES
 
     # z
     [ z.append(polyz_unpack(unhexlify(sig[offset + index : offset + index + POLZ_SIZE_PACKED*2]))) for index in range(0, (POLZ_SIZE_PACKED*2)*L, (POLZ_SIZE_PACKED*2)) ]
