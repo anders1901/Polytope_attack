@@ -145,7 +145,7 @@ jupyter notebook
 | Name                   | Description                                              |
 | :---                   | :---                                                     |
 | `Additional_files`     | Additional material used for the attack                  |
-| `dilithium`     | Reference implementation of Dilithium from   [GitHub](https://github.com/pq-crystals/dilithium/tree/3e9b9f1412f6c7435dbeb4e10692ea58f181ee51)               |
+| `dilithium`     | Reference implementation of Dilithium from   [GitHub](https://github.com/pq-crystals/dilithium) |
 | `lp_solve_5.5`         | Library used to solve LP systems                     |
 | `sign_and_filter.sh`   | Bash script to automate generation of useful faulted signatures    |
 
