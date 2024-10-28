@@ -17,7 +17,7 @@ The following is required:
 ### Installation Steps
 1. Check Python version:  
 ```bash
-python --version
+python --version # on some systems try python3 --version
 ```
 If not installed or outdated, you can install it with:
 ```bash
@@ -44,15 +44,15 @@ pip install --user pipenv --break-system-packages
 
 4. The library lpsolve for Python is used for faster LP solver and ILP solver but the installation can be tedious. Alternatively you can skip this installation and perform the resolution part with scipy.  
 
-   1. Unzip the folder provided:
-```bash
-tar -xzf lp_solve_5.5.tar.gz
-```
-   2. Install lpsolve with the provided package. This will create a shared library file in ```lp_solve_5.5/lpsolve55/bin/<rest_of_path>```:
+   1. Install lpsolve with the provided package. This will create a shared library file in ```lp_solve_5.5/lpsolve55/bin/platform/liblpsolve55.so```, where `/platform/` depeends on your platform:
 ```bash
 cd lp_solve_5.5/lpsolve55
 sh ccc
 ```
+   2.  Export the complete path to the shared library file to the environment variable:
+ ```bash
+export LD_LIBRARY_PATH=/start/of/path/lp_solve_5.5/lpsolve55/bin/platform/liblpsolve55.so
+```  
    3.  Install lpsolve extension into site-packages.
 ```bash
 python setup.py install
