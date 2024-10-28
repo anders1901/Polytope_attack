@@ -12,7 +12,7 @@ The following is required:
 * Python >= 3.9
 * Pipenv
 * lpsolve5.5
-* Dilithium (commit 3e9b9f1)
+* Dilithium (commit cbcd875)
 
 ### Installation Steps
 1. Check Python version:  
