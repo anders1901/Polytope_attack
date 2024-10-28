@@ -1,3 +1,9 @@
+#include <ctype.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "additional_fct.h"
 #include "fips202.h"
 #include "packing.h"
@@ -7,11 +13,6 @@
 #include "randombytes.h"
 #include "rounding.h"
 #include "symmetric.h"
-#include <ctype.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define MAX_MARKER_LEN 50
 
