@@ -43,21 +43,20 @@ pip install --user pipenv --break-system-packages
 ```  
 
 4. The library lpsolve for Python is used for faster LP solver and ILP solver but the installation can be tedious. Alternatively you can skip this installation and perform the resolution part with scipy.  
-
-   1. Install lpsolve with the provided package. This will create a shared library file in ```lp_solve_5.5/lpsolve55/bin/platform/liblpsolve55.so```, where `/platform/` depeends on your platform:
-```bash
-cd lp_solve_5.5/lpsolve55
-sh ccc
-```
+   1.  Install lpsolve with the provided package. This will create a shared library file in ```lp_solve_5.5/lpsolve55/bin/platform/liblpsolve55.so```, where `/platform/` depeends on your platform:  
+   ```bash
+   cd lp_solve_5.5/lpsolve55
+   sh ccc
+   ```  
    2.  Export the complete path to the shared library file to the environment variable:
- ```bash
-export LD_LIBRARY_PATH=/start/of/path/lp_solve_5.5/lpsolve55/bin/platform/liblpsolve55.so
-```  
+   ```bash
+   export LD_LIBRARY_PATH=/start/of/path/lp_solve_5.5/lpsolve55/bin/platform/liblpsolve55.so
+   ```  
    3.  Install lpsolve extension into site-packages.
-```bash
-python setup.py install
-python setup.py bdist
-```
+   ```bash
+   python setup.py install
+   python setup.py bdist
+   ```
 
 5. For some of the test, the Dilithium reference implementation requires OpenSSL. Install it (if needed) with:
 ```bash
@@ -87,29 +86,29 @@ make PQCgenKAT_sign_Modified$ALG
 
 2. Generate the faulted signatures associated with each key:
 - For the specification of Dilithium using the script `Gen_Signs_KeyKAT.c`
-```bash
-make Gen_Signs_KeyKAT$ALG
-./Gen_Signs_KeyKAT$ALG $NB_SIGNS
-```
+   ```bash
+   make Gen_Signs_KeyKAT$ALG
+   ./Gen_Signs_KeyKAT$ALG $NB_SIGNS
+   ```
 
 - For the implementation of Dilithium using the script `Gen_SignsRef_KeyKAT.c`
-```bash
-make Gen_SignsRef_KeyKAT$ALG
-./Gen_SignsRef_KeyKAT$ALG $NB_SIGNS
-```
+   ```bash
+   make Gen_SignsRef_KeyKAT$ALG
+   ./Gen_SignsRef_KeyKAT$ALG $NB_SIGNS
+   ```
 
 3. Filter for the signature providing information on $\mathbf{s}_2$:
 - For signatures produced using the specification of Dilithium using the script `Filter_Signs_Proposition3.c`:
-```bash
-make Filter_Signs_Proposition3$ALG
-./Filter_Signs_Proposition3$ALG $NB_SIGNS
-```
+   ```bash
+   make Filter_Signs_Proposition3$ALG
+   ./Filter_Signs_Proposition3$ALG $NB_SIGNS
+   ```
 
 - For signatures produced using the implementation of Dilithium using the script `Filter_Signs_Proposition5.c`:
-```bash
-make Filter_Signs_Proposition5$ALG
-./Filter_Signs_Proposition5$ALG $NB_SIGNS
-```
+   ```bash
+   make Filter_Signs_Proposition5$ALG
+   ./Filter_Signs_Proposition5$ALG $NB_SIGNS
+   ```
 
 4. To verify Assumption 2 from the paper use the script `Verify_Assumption2.c` (not necessary for the attack):
 ```bash
@@ -122,7 +121,7 @@ Make sure you have the file `Polytope_Attack/Additionnal_files/Signs_filtered/Di
 
 1. Install Virtual Environment Dependencies
 ```bash 
-pipenv install
+pipenv sync
 ```
 
 2. Activate the Virtual Environment 
@@ -146,7 +145,7 @@ jupyter notebook
 | Name                   | Description                                              |
 | :---                   | :---                                                     |
 | `Additional_files`     | Additional material used for the attack                  |
-| `dilithium-master`     | Reference implementation of Dilithium from   [GitHub](https://github.com/pq-crystals/dilithium/tree/3e9b9f1412f6c7435dbeb4e10692ea58f181ee51)               |
+| `dilithium`     | Reference implementation of Dilithium from   [GitHub](https://github.com/pq-crystals/dilithium/tree/3e9b9f1412f6c7435dbeb4e10692ea58f181ee51)               |
 | `lp_solve_5.5`         | Library used to solve LP systems                     |
 | `sign_and_filter.sh`   | Bash script to automate generation of useful faulted signatures    |
 
