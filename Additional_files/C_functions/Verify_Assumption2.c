@@ -25,7 +25,7 @@
 #define CRYPTO_FAILURE -4
 
 int main(int argc, char *argv[]) {
-  char fn_rsp[32], fn_signs[64];
+  char fn_rsp[48], fn_signs[64];
   FILE *fp_rsp, *fp_signs;
   uint8_t seed[48];
   uint8_t entropy_input[48];
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     entropy_input[j] = 1;
   }
 
-  sprintf(fn_rsp, "PQCsignKAT_%.16s.rsp", CRYPTO_ALGNAME);
+  sprintf(fn_rsp, "../KAT/PQCsignKAT_%.16s.rsp", CRYPTO_ALGNAME);
   if ((fp_rsp = fopen(fn_rsp, "r")) == NULL) {
     printf("Couldn't open <%s> for read\n", fn_rsp);
     return FILE_OPEN_ERROR;
