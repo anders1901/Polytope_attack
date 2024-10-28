@@ -36,20 +36,32 @@ NBKEYS=1
 cd Additional_files/C_functions
 
 ## First generate 1 key for the chosen security level
-make PQCgenKAT_sign_Modified$ALG
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+  make PQCgenKAT_sign_Modified$ALG > NUL
+else
+  make PQCgenKAT_sign_Modified$ALG > /dev/null
+fi
 echo '>>> Generating KATS ' | tr -d '\n'
 ./PQCgenKAT_sign_Modified$ALG $NBKEYS
 echo -e '\n\u2705'
 
 ## Then generate the corresponding number of (simulated) faulted signatures
-make Gen_Signs_KeyKAT$ALG
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+  make Gen_Signs_KeyKAT$ALG > NUL
+else
+  make Gen_Signs_KeyKAT$ALG > /dev/null
+fi
 echo '>>> Generating faulted signs ' 
 ./Gen_Signs_KeyKAT$ALG $NBSIGNS
 echo ' '
 echo -e '\u2705'
 
 ## Finally filter the ones that give inequalities on $\mathbf{s}_2$
-make Filter_Signs_Proposition3$ALG
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+  make Filter_Signs_Proposition3$ALG > NUL
+else
+  make Filter_Signs_Proposition3$ALG > /dev/null
+fi
 echo '>>> Filtering faulted signs ' 
 ./Filter_Signs_Proposition3$ALG $NBSIGNS
 echo ' '
