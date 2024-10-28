@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Function to prompt the user for the version of Dilithium
-get_dilithium_version() {
+# Function to prompt the user for the security level of Dilithium
+get_dilithium_security_level() {
   while true; do
-    read -p "Which version of Dilithium do you want to target (2/3/5)? " ALG
+    read -p "Which security level of Dilithium do you want to target (2/3/5)? " ALG
     case $ALG in
       2)
-        NBSIGNS=1250000
+        # NBSIGNS=1250000
+        NBSIGNS=100000
         break
         ;;
       3)
@@ -18,14 +19,14 @@ get_dilithium_version() {
         break
         ;;
       *)
-        echo "Error: Invalid version. Please enter 2, 3, or 5."
+        echo "Error: Invalid security level. Please enter 2, 3, or 5."
         ;;
     esac
   done
 }
 
-# Get the Dilithium version
-get_dilithium_version
+# Get the Dilithium security level
+get_dilithium_security_level
 
 # Set NBKEYS to 1
 NBKEYS=1
@@ -38,16 +39,18 @@ cd Additional_files/C_functions
 make PQCgenKAT_sign_Modified$ALG
 echo '>>> Generating KATS ' | tr -d '\n'
 ./PQCgenKAT_sign_Modified$ALG $NBKEYS
-echo -e '\u2705'
+echo -e '\n\u2705'
 
 ## Then generate the corresponding number of (simulated) faulted signatures
 make Gen_Signs_KeyKAT$ALG
-echo '>>> Generating faulted signs ' | tr -d '\n'
+echo '>>> Generating faulted signs ' 
 ./Gen_Signs_KeyKAT$ALG $NBSIGNS
+echo ' '
 echo -e '\u2705'
 
 ## Finally filter the ones that give inequalities on $\mathbf{s}_2$
 make Filter_Signs_Proposition3$ALG
-echo '>>> Filtering faulted signs ' | tr -d '\n'
+echo '>>> Filtering faulted signs ' 
 ./Filter_Signs_Proposition3$ALG $NBSIGNS
+echo ' '
 echo -e '\u2705'
