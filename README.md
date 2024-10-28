@@ -73,7 +73,7 @@ In the following:
 
 For an end-to-end generation of faulted signatures and filtration of interesting ones on the specification of Dilithium, in `Polytope_Attack/` use the script 
 ```bash
-./full_signs_spec.sh
+./sign_and_filter.sh
 ```
 Then, with the set of signatures in `Polytope_Attack/Additionnal_files/Signs_filtered/`, you can directly skip to the Python part.
 
@@ -148,7 +148,7 @@ jupyter notebook
 | `Additional_files`     | Additional material used for the attack                  |
 | `dilithium-master`     | Reference implementation of Dilithium from   [GitHub](https://github.com/pq-crystals/dilithium/tree/3e9b9f1412f6c7435dbeb4e10692ea58f181ee51)               |
 | `lp_solve_5.5`         | Library used to solve LP systems                     |
-| `full_signs_spec.sh`   | Bash script to automate generation of useful faulted signatures    |
+| `sign_and_filter.sh`   | Bash script to automate generation of useful faulted signatures    |
 
 ------
 ## License
