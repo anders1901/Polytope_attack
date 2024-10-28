@@ -6,8 +6,7 @@ get_dilithium_security_level() {
     read -p "Which security level of Dilithium do you want to target (2/3/5)? " ALG
     case $ALG in
       2)
-        # NBSIGNS=1250000
-        NBSIGNS=100000
+        NBSIGNS=1250000
         break
         ;;
       3)
@@ -25,8 +24,31 @@ get_dilithium_security_level() {
   done
 }
 
+# Function to prompt the user for the version of Dilithium
+get_dilithium_version() {
+  while true; do
+    read -p "Which version of Dilithium do you want to target ([s]pec/[r]ef)? " input
+    case $input in
+      s|spec)
+        GENSIGNSTARGET="Gen_Signs_KeyKAT"
+        FILTERSIGNS="Filter_Signs_Proposition3"
+        break
+        ;;
+      r|ref)
+        GENSIGNSTARGET="Gen_SignsRef_KeyKAT"
+        FILTERSIGNS="Filter_Signs_Proposition5"
+        break
+        ;;
+      *)
+        echo "Error: Invalid version. Please enter [s]pec or [r]ef."
+        ;;
+    esac
+  done
+}
+
 # Get the Dilithium security level
 get_dilithium_security_level
+get_dilithium_version
 
 # Set NBKEYS to 1
 NBKEYS=1
@@ -47,22 +69,22 @@ echo -e '\n\u2705'
 
 ## Then generate the corresponding number of (simulated) faulted signatures
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-  make Gen_Signs_KeyKAT$ALG > NUL
+  make ${GENSIGNSTARGET}$ALG > NUL
 else
-  make Gen_Signs_KeyKAT$ALG > /dev/null
+  make ${GENSIGNSTARGET}$ALG > /dev/null
 fi
 echo '>>> Generating faulted signs ' 
-./Gen_Signs_KeyKAT$ALG $NBSIGNS
+./${GENSIGNSTARGET}$ALG $NBSIGNS
 echo ' '
 echo -e '\u2705'
 
 ## Finally filter the ones that give inequalities on $\mathbf{s}_2$
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-  make Filter_Signs_Proposition3$ALG > NUL
+  make ${FILTERSIGNS}$ALG > NUL
 else
-  make Filter_Signs_Proposition3$ALG > /dev/null
+  make ${FILTERSIGNS}$ALG > /dev/null
 fi
 echo '>>> Filtering faulted signs ' 
-./Filter_Signs_Proposition3$ALG $NBSIGNS
+./${FILTERSIGNS}$ALG $NBSIGNS
 echo ' '
 echo -e '\u2705'
